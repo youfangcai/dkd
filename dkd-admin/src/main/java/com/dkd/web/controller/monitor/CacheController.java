@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import com.dkd.manage.domain.Sku;
+import com.dkd.manage.service.ISkuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,6 +24,8 @@ import com.dkd.common.core.domain.AjaxResult;
 import com.dkd.common.utils.StringUtils;
 import com.dkd.system.domain.SysCache;
 
+import javax.annotation.Resource;
+
 /**
  * 缓存监控
  * 
@@ -32,6 +37,8 @@ public class CacheController
 {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    @Resource
+    private ISkuService skuService;
 
     private final static List<SysCache> caches = new ArrayList<SysCache>();
     {
@@ -48,6 +55,8 @@ public class CacheController
     @GetMapping()
     public AjaxResult getInfo() throws Exception
     {
+
+        skuService.selectSkuList(new Sku());
         Properties info = (Properties) redisTemplate.execute((RedisCallback<Object>) connection -> connection.info());
         Properties commandStats = (Properties) redisTemplate.execute((RedisCallback<Object>) connection -> connection.info("commandstats"));
         Object dbSize = redisTemplate.execute((RedisCallback<Object>) connection -> connection.dbSize());
@@ -117,4 +126,6 @@ public class CacheController
         redisTemplate.delete(cacheKeys);
         return AjaxResult.success();
     }
+
+
 }

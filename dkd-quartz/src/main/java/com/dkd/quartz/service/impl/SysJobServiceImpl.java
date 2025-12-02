@@ -38,10 +38,10 @@ public class SysJobServiceImpl implements ISysJobService
     public void init() throws SchedulerException, TaskException
     {
         scheduler.clear();
-        List<SysJob> jobList = jobMapper.selectJobAll();
+        List<SysJob> jobList = jobMapper.selectJobAll(); // 获取所有任务列表
         for (SysJob job : jobList)
         {
-            ScheduleUtils.createScheduleJob(scheduler, job);
+            ScheduleUtils.createScheduleJob(scheduler, job); // 创建定时任务
         }
     }
 
@@ -104,6 +104,7 @@ public class SysJobServiceImpl implements ISysJobService
         int rows = jobMapper.updateJob(job);
         if (rows > 0)
         {
+            // 恢复任务的调度
             scheduler.resumeJob(ScheduleUtils.getJobKey(jobId, jobGroup));
         }
         return rows;
@@ -187,7 +188,7 @@ public class SysJobServiceImpl implements ISysJobService
         if (scheduler.checkExists(jobKey))
         {
             result = true;
-            scheduler.triggerJob(jobKey, dataMap);
+            scheduler.triggerJob(jobKey, dataMap); // 立即执行定时任务
         }
         return result;
     }
@@ -201,7 +202,7 @@ public class SysJobServiceImpl implements ISysJobService
     @Transactional(rollbackFor = Exception.class)
     public int insertJob(SysJob job) throws SchedulerException, TaskException
     {
-        job.setStatus(ScheduleConstants.Status.PAUSE.getValue());
+        job.setStatus(ScheduleConstants.Status.PAUSE.getValue()); // 设置新增的任务默认为暂停状态
         int rows = jobMapper.insertJob(job);
         if (rows > 0)
         {

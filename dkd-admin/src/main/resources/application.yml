@@ -68,13 +68,13 @@ spring:
   # redis 配置
   redis:
     # 地址
-    host: localhost
+    host: redis-12098.c92.us-east-1-3.ec2.redns.redis-cloud.com
     # 端口，默认为6379
-    port: 6379
+    port: 12098
     # 数据库索引
     database: 0
     # 密码
-    password: root
+    password: FXphv2WWcexxpzUFz75RCMB9XSbDCQ3p
     # 连接超时时间
     timeout: 10s
     lettuce:
@@ -95,7 +95,7 @@ token:
   # 令牌密钥
   secret: abcdefghijklmnopqrstuvwxyz
   # 令牌有效期（默认30分钟）
-  expireTime: 30
+  expireTime: 60
 
 # MyBatis配置
 mybatis:

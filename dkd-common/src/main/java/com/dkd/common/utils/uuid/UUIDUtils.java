@@ -19,7 +19,7 @@ public class UUIDUtils {
      * @return 返回一个8位的字符字符串，作为简短的UUID表示。
      */
     public static String getUUID() {
-        // 生成一个标准的UUID字符串，并移除其中的连字符
+        // 生成一个标准的32位的UUID字符串，并移除其中的连字符
         String uuid= UUID.randomUUID().toString().replace("-", "");
         StringBuffer shortBuffer = new StringBuffer();
 

@@ -16,7 +16,7 @@ import com.dkd.quartz.domain.SysJob;
 public class JobInvokeUtil
 {
     /**
-     * 执行方法
+     * 获取执行方法
      *
      * @param sysJob 系统任务
      */
@@ -27,7 +27,7 @@ public class JobInvokeUtil
         String methodName = getMethodName(invokeTarget);
         List<Object[]> methodParams = getMethodParams(invokeTarget);
 
-        if (!isValidClassName(beanName))
+        if (!isValidClassName(beanName)) // 判断是否为为class包名
         {
             Object bean = SpringUtils.getBean(beanName);
             invokeMethod(bean, methodName, methodParams);

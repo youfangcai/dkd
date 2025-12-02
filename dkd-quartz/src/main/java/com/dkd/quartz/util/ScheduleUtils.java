@@ -34,7 +34,7 @@ public class ScheduleUtils
      */
     private static Class<? extends Job> getQuartzJobClass(SysJob sysJob)
     {
-        boolean isConcurrent = "0".equals(sysJob.getConcurrent());
+        boolean isConcurrent = "0".equals(sysJob.getConcurrent()); // 判断是否并发执行
         return isConcurrent ? QuartzJobExecution.class : QuartzDisallowConcurrentExecution.class;
     }
 
@@ -59,21 +59,22 @@ public class ScheduleUtils
      */
     public static void createScheduleJob(Scheduler scheduler, SysJob job) throws SchedulerException, TaskException
     {
-        Class<? extends Job> jobClass = getQuartzJobClass(job);
-        // 构建job信息
+        /* 1. 判断是否并发执行，并获得对应的任务类 */
+        Class<? extends Job> jobClass = getQuartzJobClass(job); // 判断是否并发执行，并获得对应的任务执行类, 继承了 Job 类
+        /* 2. 构建job信息，（通过 JobBuilder 创建 JobDetail对象） */
         Long jobId = job.getJobId();
         String jobGroup = job.getJobGroup();
         JobDetail jobDetail = JobBuilder.newJob(jobClass).withIdentity(getJobKey(jobId, jobGroup)).build();
 
-        // 表达式调度构建器
+        // 表达式调度构建器， 设置复杂的定时任务策略
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(job.getCronExpression());
-        cronScheduleBuilder = handleCronScheduleMisfirePolicy(job, cronScheduleBuilder);
+        cronScheduleBuilder = handleCronScheduleMisfirePolicy(job, cronScheduleBuilder); // 设置定时任务策略
 
-        // 按新的cronExpression表达式构建一个新的trigger
+        /* 3. 按新的cronExpression表达式构建一个新的trigger， （通过 TriggerBuilder 构建 Trigger 类对象） */
         CronTrigger trigger = TriggerBuilder.newTrigger().withIdentity(getTriggerKey(jobId, jobGroup))
-                .withSchedule(cronScheduleBuilder).build();
+                .withSchedule(cronScheduleBuilder).build(); // 根据Corne表达式执行Scheduler
 
-        // 放入参数，运行时的方法可以获取
+        // 放入参数，运行时的方法可以获取job
         jobDetail.getJobDataMap().put(ScheduleConstants.TASK_PROPERTIES, job);
 
         // 判断是否存在
@@ -86,11 +87,11 @@ public class ScheduleUtils
         // 判断任务是否过期
         if (StringUtils.isNotNull(CronUtils.getNextExecution(job.getCronExpression())))
         {
-            // 执行调度任务
-            scheduler.scheduleJob(jobDetail, trigger);
+            /* 4. 设置执行的调度任务， （将 jobDetail 和 trigger 添加到 scheduler 调度器中） */
+            scheduler.scheduleJob(jobDetail, trigger); // 默认是已经开始执行了，虽然是暂停状态
         }
 
-        // 暂停任务
+        // 判断是否是暂停任务
         if (job.getStatus().equals(ScheduleConstants.Status.PAUSE.getValue()))
         {
             scheduler.pauseJob(ScheduleUtils.getJobKey(jobId, jobGroup));
@@ -105,13 +106,13 @@ public class ScheduleUtils
     {
         switch (job.getMisfirePolicy())
         {
-            case ScheduleConstants.MISFIRE_DEFAULT:
+            case ScheduleConstants.MISFIRE_DEFAULT: // 默认正常策略
                 return cb;
-            case ScheduleConstants.MISFIRE_IGNORE_MISFIRES:
+            case ScheduleConstants.MISFIRE_IGNORE_MISFIRES:  /** 立即触发执行 */
                 return cb.withMisfireHandlingInstructionIgnoreMisfires();
-            case ScheduleConstants.MISFIRE_FIRE_AND_PROCEED:
+            case ScheduleConstants.MISFIRE_FIRE_AND_PROCEED:    /** 触发一次执行 */
                 return cb.withMisfireHandlingInstructionFireAndProceed();
-            case ScheduleConstants.MISFIRE_DO_NOTHING:
+            case ScheduleConstants.MISFIRE_DO_NOTHING:     /** 不触发立即执行 */
                 return cb.withMisfireHandlingInstructionDoNothing();
             default:
                 throw new TaskException("The task misfire policy '" + job.getMisfirePolicy()

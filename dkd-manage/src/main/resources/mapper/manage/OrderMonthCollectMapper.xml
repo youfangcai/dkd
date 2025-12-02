@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dkd.manage.mapper.OrderMonthCollectMapper">
+    
+    <resultMap type="OrderMonthCollect" id="OrderMonthCollectResult">
+        <result property="id"    column="id"    />
+        <result property="partnerId"    column="partner_id"    />
+        <result property="partnerName"    column="partner_name"    />
+        <result property="regionId"    column="region_id"    />
+        <result property="regionName"    column="region_name"    />
+        <result property="orderTotalMoney"    column="order_total_money"    />
+        <result property="orderTotalCount"    column="order_total_count"    />
+        <result property="month"    column="month"    />
+        <result property="year"    column="year"    />
+    </resultMap>
+
+    <sql id="selectOrderMonthCollectVo">
+        select id, partner_id, partner_name, region_id, region_name, order_total_money, order_total_count, month, year from tb_order_month_collect
+    </sql>
+
+    <select id="selectOrderMonthCollectList" parameterType="OrderMonthCollect" resultMap="OrderMonthCollectResult">
+        <include refid="selectOrderMonthCollectVo"/>
+        <where>  
+            <if test="partnerId != null "> and partner_id = #{partnerId}</if>
+            <if test="partnerName != null  and partnerName != ''"> and partner_name like concat('%', #{partnerName}, '%')</if>
+            <if test="regionId != null "> and region_id = #{regionId}</if>
+            <if test="regionName != null  and regionName != ''"> and region_name like concat('%', #{regionName}, '%')</if>
+            <if test="orderTotalMoney != null "> and order_total_money = #{orderTotalMoney}</if>
+            <if test="orderTotalCount != null "> and order_total_count = #{orderTotalCount}</if>
+            <if test="month != null "> and month = #{month}</if>
+            <if test="year != null "> and year = #{year}</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderMonthCollectById" parameterType="Long" resultMap="OrderMonthCollectResult">
+        <include refid="selectOrderMonthCollectVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertOrderMonthCollect" parameterType="OrderMonthCollect">
+        insert into tb_order_month_collect
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="partnerId != null">partner_id,</if>
+            <if test="partnerName != null">partner_name,</if>
+            <if test="regionId != null">region_id,</if>
+            <if test="regionName != null">region_name,</if>
+            <if test="orderTotalMoney != null">order_total_money,</if>
+            <if test="orderTotalCount != null">order_total_count,</if>
+            <if test="month != null">month,</if>
+            <if test="year != null">year,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="partnerId != null">#{partnerId},</if>
+            <if test="partnerName != null">#{partnerName},</if>
+            <if test="regionId != null">#{regionId},</if>
+            <if test="regionName != null">#{regionName},</if>
+            <if test="orderTotalMoney != null">#{orderTotalMoney},</if>
+            <if test="orderTotalCount != null">#{orderTotalCount},</if>
+            <if test="month != null">#{month},</if>
+            <if test="year != null">#{year},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrderMonthCollect" parameterType="OrderMonthCollect">
+        update tb_order_month_collect
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="partnerId != null">partner_id = #{partnerId},</if>
+            <if test="partnerName != null">partner_name = #{partnerName},</if>
+            <if test="regionId != null">region_id = #{regionId},</if>
+            <if test="regionName != null">region_name = #{regionName},</if>
+            <if test="orderTotalMoney != null">order_total_money = #{orderTotalMoney},</if>
+            <if test="orderTotalCount != null">order_total_count = #{orderTotalCount},</if>
+            <if test="month != null">month = #{month},</if>
+            <if test="year != null">year = #{year},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteOrderMonthCollectById" parameterType="Long">
+        delete from tb_order_month_collect where id = #{id}
+    </delete>
+
+    <delete id="deleteOrderMonthCollectByIds" parameterType="String">
+        delete from tb_order_month_collect where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

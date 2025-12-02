@@ -20,12 +20,14 @@ import com.dkd.framework.security.filter.JwtAuthenticationTokenFilter;
 import com.dkd.framework.security.handle.AuthenticationEntryPointImpl;
 import com.dkd.framework.security.handle.LogoutSuccessHandlerImpl;
 
+import javax.annotation.Resource;
+
 /**
  * spring security配置
  * 
  * @author ruoyi
  */
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true) // 启用方法级别的权限注解
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
     /**
@@ -65,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     private PermitAllUrlProperties permitAllUrl;
 
     /**
-     * 解决 无法直接注入 AuthenticationManager
+     * 解决 无法直接注入 AuthenticationManager 认证管理器
      *
      * @return
      * @throws Exception
@@ -143,6 +145,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception
     {
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder()); // 配置为使用数据库中的用户信息来认证 （认证信息的获取方式）
     }
 }

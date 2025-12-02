@@ -259,17 +259,19 @@ public class GenTableServiceImpl implements IGenTableService
         // 设置主键列信息
         setPkColumn(table);
 
+        // 1. 初始化
         VelocityInitializer.initVelocity();
 
+        // 2. 数据模型
         VelocityContext context = VelocityUtils.prepareContext(table);
 
-        // 获取模板列表
+        // 3.获取模板列表
         List<String> templates = VelocityUtils.getTemplateList(table.getTplCategory(), table.getTplWebType());
         for (String template : templates)
         {
             if (!StringUtils.containsAny(template, "sql.vm", "api.js.vm", "index.vue.vm", "index-tree.vue.vm"))
             {
-                // 渲染模板
+                // 4.渲染模板
                 StringWriter sw = new StringWriter();
                 Template tpl = Velocity.getTemplate(template, Constants.UTF8);
                 tpl.merge(context, sw);
@@ -361,7 +363,7 @@ public class GenTableServiceImpl implements IGenTableService
     }
 
     /**
-     * 查询表信息并生成代码
+     * 查询表信息并生成代码（.zip格式）
      */
     private void generatorCode(String tableName, ZipOutputStream zip)
     {
@@ -372,15 +374,16 @@ public class GenTableServiceImpl implements IGenTableService
         // 设置主键列信息
         setPkColumn(table);
 
+        /* 1. 初始化 */
         VelocityInitializer.initVelocity();
 
-        VelocityContext context = VelocityUtils.prepareContext(table);
+        /* 2.数据模型的编写和获取模板列表, 实际要设计和修改的 */
+        VelocityContext context = VelocityUtils.prepareContext(table); // 数据的填充
+        List<String> templates = VelocityUtils.getTemplateList(table.getTplCategory(), table.getTplWebType()); // 模板的获取
 
-        // 获取模板列表
-        List<String> templates = VelocityUtils.getTemplateList(table.getTplCategory(), table.getTplWebType());
         for (String template : templates)
         {
-            // 渲染模板
+            /* 3. 渲染模板 */
             StringWriter sw = new StringWriter();
             Template tpl = Velocity.getTemplate(template, Constants.UTF8);
             tpl.merge(context, sw);

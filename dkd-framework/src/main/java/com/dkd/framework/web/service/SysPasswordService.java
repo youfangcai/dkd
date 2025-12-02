@@ -45,9 +45,9 @@ public class SysPasswordService
     {
         Authentication usernamePasswordAuthenticationToken = AuthenticationContextHolder.getContext();
         String username = usernamePasswordAuthenticationToken.getName();
-        String password = usernamePasswordAuthenticationToken.getCredentials().toString();
+        String password = usernamePasswordAuthenticationToken.getCredentials().toString(); // 提取出密码
 
-        Integer retryCount = redisCache.getCacheObject(getCacheKey(username));
+        Integer retryCount = redisCache.getCacheObject(getCacheKey(username)); // 获取缓存的登录用户名次数， 实现控制登录重试次数
 
         if (retryCount == null)
         {
@@ -59,15 +59,15 @@ public class SysPasswordService
             throw new UserPasswordRetryLimitExceedException(maxRetryCount, lockTime);
         }
 
-        if (!matches(user, password))
+        if (!matches(user, password)) // 密码匹配实现
         {
             retryCount = retryCount + 1;
-            redisCache.setCacheObject(getCacheKey(username), retryCount, lockTime, TimeUnit.MINUTES);
+            redisCache.setCacheObject(getCacheKey(username), retryCount, lockTime, TimeUnit.MINUTES); // 更新缓存登录用户名次数
             throw new UserPasswordNotMatchException();
         }
         else
         {
-            clearLoginRecordCache(username);
+            clearLoginRecordCache(username); // 登录成功清除缓存的登录用户名次数
         }
     }
 

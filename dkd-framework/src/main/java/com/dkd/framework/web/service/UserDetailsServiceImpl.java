@@ -34,6 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService
     @Autowired
     private SysPermissionService permissionService;
 
+    // 实现认证功能
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {

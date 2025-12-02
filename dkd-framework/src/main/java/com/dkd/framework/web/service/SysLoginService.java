@@ -65,7 +65,7 @@ public class SysLoginService
     {
         // 验证码校验
         validateCaptcha(username, code, uuid);
-        // 登录前置校验
+        // 登录前置校验（前端提交的参数格式是否合法），前端只防君子不防小人
         loginPreCheck(username, password);
         // 用户验证
         Authentication authentication = null;
@@ -74,7 +74,7 @@ public class SysLoginService
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
             AuthenticationContextHolder.setContext(authenticationToken);
             // 该方法会去调用UserDetailsServiceImpl.loadUserByUsername
-            authentication = authenticationManager.authenticate(authenticationToken);
+            authentication = authenticationManager.authenticate(authenticationToken); // loadUserByUsername方法实现了认证功能
         }
         catch (Exception e)
         {
@@ -93,9 +93,10 @@ public class SysLoginService
         {
             AuthenticationContextHolder.clearContext();
         }
+        // 记录登录信息
         AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
-        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-        recordLoginInfo(loginUser.getUserId());
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();  // 获取登录用户信息
+        recordLoginInfo(loginUser.getUserId()); // 记录登录信息
         // 生成token
         return tokenService.createToken(loginUser);
     }
@@ -110,19 +111,21 @@ public class SysLoginService
      */
     public void validateCaptcha(String username, String code, String uuid)
     {
-        boolean captchaEnabled = configService.selectCaptchaEnabled();
+        boolean captchaEnabled = configService.selectCaptchaEnabled(); // 判断是否开启了验证码
         if (captchaEnabled)
         {
-            String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StringUtils.nvl(uuid, "");
-            String captcha = redisCache.getCacheObject(verifyKey);
-            redisCache.deleteObject(verifyKey);
+            String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StringUtils.nvl(uuid, ""); // 验证码key
+            String captcha = redisCache.getCacheObject(verifyKey); // 通过key获取验证码, 若未获得即为验证码过期
+            redisCache.deleteObject(verifyKey); // 立即删除验证码
             if (captcha == null)
             {
+                // 记录验证码已失效日志信息
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire")));
                 throw new CaptchaExpireException();
             }
-            if (!code.equalsIgnoreCase(captcha))
+            if (!code.equalsIgnoreCase(captcha)) // 校验验证码是否匹配（不区分大小写）
             {
+                // 记录不匹配日志信息
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
                 throw new CaptchaException();
             }
