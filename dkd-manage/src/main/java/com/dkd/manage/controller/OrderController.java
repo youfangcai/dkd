@@ -41,7 +41,7 @@ public class OrderController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(Order order)
     {
-        // 订单已修改完成
+        // 订单已修改完成wc
         startPage();
         List<Order> list = orderService.selectOrderList(order);
         return getDataTable(list);
